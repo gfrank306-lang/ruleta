@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ruleta 3D</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+#ruleta{
+    position:relative;
+    width:min(96vw,760px);
+    aspect-ratio:1;
+    perspective:1200px;
+}
+
+/* =====================================================
+   RUEDA
+===================================================== */
+
+.rueda{
+    position:absolute;
+    inset:0;
+    transform-style:preserve-3d;
+    transform:rotateX(4deg);
+}
+
+/* =====================================================
+   ANILLOS
+===================================================== */
+
+#azul,
+#rojo{
+    position:absolute;
+    transform-origin:50% 50%;
+    transform-style:preserve-3d;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:none;
+}
+
+/* ANILLO AZUL */
+
+#azul{
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:2;
+
+    filter:
+        drop-shadow(0 0 7px #00d9ff)
+        drop-shadow(0 0 20px #006eff);
+}
+
+/* ANILLO ROJO */
+
+#rojo{
+    inset:14%;
+    width:72%;
+    height:72%;
+    z-index:5;
+
+    filter:
+        drop-shadow(0 0 7px #ff1515)
+        drop-shadow(0 0 18px #ff0000);
+}
+
+/* =====================================================
+   CENTRO FIJO
+===================================================== */
+
+#centro{
+    position:absolute;
+    z-index:100;
+
+    left:50%;
+    top:50%;
+
+    width:39%;
+    height:39%;
+
+    transform:translate(-50%,-50%);
+
+    pointer-events:auto;
+}
+
+.pentagono{
+    position:relative;
+
+    width:100%;
+    height:100%;
+
+    clip-path:polygon(
+        50% 0%,
+        98% 35%,
+        80% 100%,
+        20% 100%,
+        2% 35%
+    );
+
+    background:
+        linear-gradient(
+            145deg,
+            #fff92c 0%,
+            #ffe000 28%,
+            #ffc400 60%,
+            #bd7900 100%
+        );
+
+    box-shadow:
+        inset 0 0 18px #fff700,
+        inset 0 -16px 22px #8d5700,
+        0 0 12px #ffe000,
+        0 0 30px #ffb000;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    padding:15% 10%;
+}
+
+.pentagono::after{
+    content:"";
+    position:absolute;
+    top:7%;
+    left:16%;
+    width:68%;
+    height:22%;
+
+    background:linear-gradient(
+        rgba(255,255,255,.35),
+        transparent
+    );
+
+    transform:skewY(-9deg);
+    pointer-events:none;
+}
+
+/* =====================================================
+   CAMPOS
+===================================================== */
+
+.campo{
+    position:relative;
+    z-index:2;
+
+    width:100%;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    margin:2% 0;
+}
+
+.campo label{
+    color:#fff;
+
+    font-size:clamp(18px,4vw,34px);
+
+    font-weight:900;
+
+    line-height:1;
+
+    margin-bottom:7px;
+
+    -webkit-text-stroke:2px #111;
+
+    text-shadow:
+        2px 3px 0 #333,
+        0 0 5px #fff;
+}
+
+/* =====================================================
+   SELECTS
+===================================================== */
+
+select{
+    appearance:none;
+    -webkit-appearance:none;
+
+    background:
+        linear-gradient(
+            #181818,
+            #080808
+        );
+
+    color:#fff;
+
+    border:3px solid #050505;
+
+    outline:none;
+
+    border-radius:13px;
+
+    text-align:center;
+
+    font-family:Arial,sans-serif;
+    font-weight:900;
+
+    box-shadow:
+        inset 0 0 7px #444,
+        0 0 0 2px #ffd900;
+
+    cursor:pointer;
+}
+
+/* SOLO EL NUMERO */
+
+#dia{
+    width:76px;
+    height:45px;
+    font-size:22px;
+}
+
+/* SOLO EL MES */
+
+#mes{
+    width:125px;
+    height:45px;
+    font-size:16px;
+}
+
+select:focus{
+    box-shadow:
+        inset 0 0 7px #555,
+        0 0 0 2px #ffe000,
+        0 0 12px #ffcf00;
+}
+
+/* =====================================================
+   EFECTO 3D
+===================================================== */
+
+#azul,
+#rojo{
+    transform-style:preserve-3d;
+}
+
+/* =====================================================
+   CELULAR
+===================================================== */
+
+@media(max-width:500px){
+
+    #ruleta{
+        width:96vw;
+    }
+
+    #rojo{
+        inset:14.5%;
+        width:71%;
+        height:71%;
+    }
+
+    #centro{
+        width:39%;
+        height:39%;
+    }
+
+    .campo label{
+        font-size:20px;
+    }
+
+    #dia{
+        width:70px;
+        height:42px;
+        font-size:20px;
+    }
+
+    #mes{
+        width:112px;
+        height:42px;
+        font-size:14px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="ruleta">
+
+<div class="rueda">
+
+<!-- =====================================================
+     ANILLO AZUL
+     5 SECTORES
+===================================================== -->
+
+<svg id="azul"
+     viewBox="0 0 1000 1000"
+     xmlns="http://www.w3.org/2000/svg">
+
+<defs>
+
+<radialGradient id="azulFondo">
+    <stop offset="0%" stop-color="#2785ff"/>
+    <stop offset="55%" stop-color="#0860e9"/>
+    <stop offset="100%" stop-color="#001d7d"/>
+</radialGradient>
+
+<linearGradient id="azulBrillo"
+                x1="0" y1="0"
+                x2="0" y2="1">
+
+    <stop offset="0%" stop-color="#45aaff"/>
+    <stop offset="35%" stop-color="#0872ff"/>
+    <stop offset="70%" stop-color="#0347ca"/>
+    <stop offset="100%" stop-color="#001b76"/>
+
+</linearGradient>
+
+<filter id="brilloAzul">
+
+    <feGaussianBlur
+        stdDeviation="7"
+        result="blur"/>
+
+    <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+
+</filter>
+
+<filter id="texto3D">
+
+    <feOffset
+        dx="5"
+        dy="7"
+        result="sombra"/>
+
+    <feFlood
+        flood-color="#001342"
+        flood-opacity=".9"/>
+
+    <feComposite
+        in2="sombra"
+        operator="in"
+        result="sombraFinal"/>
+
+    <feMerge>
+        <feMergeNode in="sombraFinal"/>
+        <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+
+</filter>
+
+</defs>
+
+
+<!-- BORDE EXTERIOR -->
+
+<circle
+    cx="500"
+    cy="500"
+    r="480"
+    fill="none"
+    stroke="#00dcff"
+    stroke-width="22"
+    filter="url(#brilloAzul)"/>
+
+<circle
+    cx="500"
+    cy="500"
+    r="460"
+    fill="url(#azulFondo)"
+    stroke="#0068ff"
+    stroke-width="8"/>
+
+
+<!-- =====================================================
+     5 SECTORES AZULES
+===================================================== -->
+
+<!-- VALE -->
+
+<path
+d="M500 500 L500 40
+A460 460 0 0 1 938 358 Z"
+fill="url(#azulBrillo)"
+stroke="#00174f"
+stroke-width="7"/>
+
+
+<!-- MONZ -->
+
+<path
+d="M500 500 L938 358
+A460 460 0 0 1 770 873 Z"
+fill="url(#azulFondo)"
+stroke="#00174f"
+stroke-width="7"/>
+
+
+<!-- FER -->
+
+<path
+d="M500 500 L770 873
+A460 460 0 0 1 230 873 Z"
+fill="url(#azulBrillo)"
+stroke="#00174f"
+stroke-width="7"/>
+
+
+<!-- OMAR -->
+
+<path
+d="M500 500 L230 873
+A460 460 0 0 1 62 358 Z"
+fill="url(#azulFondo)"
+stroke="#00174f"
+stroke-width="7"/>
+
+
+<!-- TONY -->
+
+<path
+d="M500 500 L62 358
+A460 460 0 0 1 500 40 Z"
+fill="url(#azulBrillo)"
+stroke="#00174f"
+stroke-width="7"/>
+
+
+<!-- =====================================================
+     NOMBRES AZULES
+     CENTRADOS EN CADA SECTOR
+===================================================== -->
+
+<g
+fill="#fff"
+font-family="Arial Black,Arial"
+font-weight="900"
+font-size="78"
+stroke="#00143f"
+stroke-width="14"
+paint-order="stroke"
+filter="url(#texto3D)"
+text-anchor="middle">
+
+<!-- VALE -->
+
+<text x="500" y="150">
+Vale
+</text>
+
+
+<!-- MONZ -->
+
+<text
+x="820"
+y="470"
+transform="rotate(72 820 470)">
+Monz
+</text>
+
+
+<!-- FER -->
+
+<text
+x="700"
+y="825"
+transform="rotate(-45 700 825)">
+Fer
+</text>
+
+
+<!-- OMAR -->
+
+<text
+x="300"
+y="825"
+transform="rotate(45 300 825)">
+Omar
+</text>
+
+
+<!-- TONY -->
+
+<text
+x="180"
+y="470"
+transform="rotate(-72 180 470)">
+Tony
+</text>
+
+</g>
+
+</svg>
+
+
+<!-- =====================================================
+     ANILLO ROJO
+     5 SECTORES
+===================================================== -->
+
+<svg id="rojo"
+     viewBox="0 0 1000 1000"
+     xmlns="http://www.w3.org/2000/svg">
+
+<defs>
+
+<radialGradient id="rojoFondo">
+    <stop offset="0%" stop-color="#ff4228"/>
+    <stop offset="55%" stop-color="#ed0808"/>
+    <stop offset="100%" stop-color="#760000"/>
+</radialGradient>
+
+<linearGradient id="rojoBrillo"
+                x1="0" y1="0"
+                x2="0" y2="1">
+
+    <stop offset="0%" stop-color="#ff503b"/>
+    <stop offset="40%" stop-color="#ff1717"/>
+    <stop offset="75%" stop-color="#cc0000"/>
+    <stop offset="100%" stop-color="#6e0000"/>
+
+</linearGradient>
+
+</defs>
+
+
+<!-- BORDE -->
+
+<circle
+cx="500"
+cy="500"
+r="455"
+fill="none"
+stroke="#ff1515"
+stroke-width="25"/>
+
+<circle
+cx="500"
+cy="500"
+r="435"
+fill="url(#rojoFondo)"
+stroke="#8b0000"
+stroke-width="8"/>
+
+
+<!-- =====================================================
+     5 SECTORES ROJOS
+===================================================== -->
+
+<!-- TRASPALEO -->
+
+<path
+d="M500 500 L500 65
+A435 435 0 0 1 914 365 Z"
+fill="url(#rojoBrillo)"
+stroke="#550000"
+stroke-width="8"/>
+
+
+<!-- POLIPASTO 1 -->
+
+<path
+d="M500 500 L914 365
+A435 435 0 0 1 755 852 Z"
+fill="url(#rojoFondo)"
+stroke="#550000"
+stroke-width="8"/>
+
+
+<!-- PALLETIZADO -->
+
+<path
+d="M500 500 L755 852
+A435 435 0 0 1 245 852 Z"
+fill="url(#rojoBrillo)"
+stroke="#550000"
+stroke-width="8"/>
+
+
+<!-- MAPAS -->
+
+<path
+d="M500 500 L245 852
+A435 435 0 0 1 86 365 Z"
+fill="url(#rojoFondo)"
+stroke="#550000"
+stroke-width="8"/>
+
+
+<!-- POLIPASTO 2 -->
+
+<path
+d="M500 500 L86 365
+A435 435 0 0 1 500 65 Z"
+fill="url(#rojoBrillo)"
+stroke="#550000"
+stroke-width="8"/>
+
+
+<!-- =====================================================
+     NOMBRES ROJOS
+     CENTRADOS DENTRO DE CADA SECTOR
+===================================================== -->
+
+<g
+fill="#fff"
+font-family="Arial Black,Arial"
+font-weight="900"
+font-size="52"
+stroke="#650000"
+stroke-width="12"
+paint-order="stroke"
+filter="url(#texto3D)"
+text-anchor="middle">
+
+
+<!-- TRASPALEO -->
+
+<text
+x="500"
+y="185">
+Traspaleo
+</text>
+
+
+<!-- POLIPASTO 1 -->
+
+<text
+x="775"
+y="465"
+transform="rotate(72 775 465)">
+Polipasto 1
+</text>
+
+
+<!-- PALLETIZADO -->
+
+<text
+x="690"
+y="755"
+transform="rotate(-42 690 755)">
+Palletizado
+</text>
+
+
+<!-- MAPAS -->
+
+<text
+x="310"
+y="755"
+transform="rotate(42 310 755)">
+Mapas
+</text>
+
+
+<!-- POLIPASTO 2 -->
+
+<text
+x="225"
+y="465"
+transform="rotate(-72 225 465)">
+Polipasto 2
+</text>
+
+</g>
+
+</svg>
+
+</div>
+
+
+<!-- =====================================================
+     PENTÁGONO FIJO
+===================================================== -->
+
+<div id="centro">
+
+<div class="pentagono">
+
+<div class="campo">
+
+<label>Día:</label>
+
+<select id="dia">
+<option value="" selected disabled></option>
+</select>
+
+</div>
+
+
+<div class="campo">
+
+<label>Mes:</label>
+
+<select id="mes">
+
+<option value="" selected disabled></option>
+
+<option>Enero</option>
+<option>Febrero</option>
+<option>Marzo</option>
+<option>Abril</option>
+<option>Mayo</option>
+<option>Junio</option>
+<option>Julio</option>
+<option>Agosto</option>
+<option>Septiembre</option>
+<option>Octubre</option>
+<option>Noviembre</option>
+<option>Diciembre</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   CREAR DÍAS
+===================================================== */
+
+const dia =
+document.getElementById("dia");
+
+for(let i=1;i<=31;i++){
+
+    const opcion =
+    document.createElement("option");
+
+    opcion.value=i;
+    opcion.textContent=i;
+
+    dia.appendChild(opcion);
+}
+
+
+/* =====================================================
+   RUEDAS DE 5 PASOS
+===================================================== */
+
+function ruedaManual(elemento){
+
+    let rotacion=0;
+
+    let inicioAngulo=0;
+
+    let inicioRotacion=0;
+
+    let moviendo=false;
+
+
+    const PASO=72;
+
+
+    function obtenerAngulo(x,y){
+
+        const rect =
+        elemento.getBoundingClientRect();
+
+        const cx =
+        rect.left+
+        rect.width/2;
+
+        const cy =
+        rect.top+
+        rect.height/2;
+
+        return Math.atan2(
+            y-cy,
+            x-cx
+        )*180/Math.PI;
+    }
+
+
+    function iniciar(x,y){
+
+        moviendo=true;
+
+        inicioAngulo =
+        obtenerAngulo(x,y);
+
+        inicioRotacion =
+        rotacion;
+
+        elemento.style.transition="none";
+    }
+
+
+    function mover(x,y){
+
+        if(!moviendo)return;
+
+        const actual =
+        obtenerAngulo(x,y);
+
+        let diferencia =
+        actual-inicioAngulo;
+
+
+        if(diferencia>180){
+            diferencia-=360;
+        }
+
+        if(diferencia<-180){
+            diferencia+=360;
+        }
+
+
+        rotacion =
+        inicioRotacion+diferencia;
+
+
+        elemento.style.transform =
+        `rotate(${rotacion}deg)`;
+    }
+
+
+    function terminar(){
+
+        if(!moviendo)return;
+
+        moviendo=false;
+
+
+        /*
+         * AL SOLTAR:
+         * la rueda se acomoda automáticamente
+         * al paso más cercano.
+         */
+
+        rotacion =
+        Math.round(rotacion/PASO)*PASO;
+
+
+        elemento.style.transition =
+        "transform .35s cubic-bezier(.2,.8,.2,1)";
+
+
+        elemento.style.transform =
+        `rotate(${rotacion}deg)`;
+    }
+
+
+    /* =================================================
+       MOUSE
+    ================================================= */
+
+    elemento.addEventListener(
+        "mousedown",
+        function(e){
+
+            e.preventDefault();
+
+            iniciar(
+                e.clientX,
+                e.clientY
+            );
+        }
+    );
+
+
+    window.addEventListener(
+        "mousemove",
+        function(e){
+
+            mover(
+                e.clientX,
+                e.clientY
+            );
+        }
+    );
+
+
+    window.addEventListener(
+        "mouseup",
+        terminar
+    );
+
+
+    /* =================================================
+       TOUCH
+    ================================================= */
+
+    elemento.addEventListener(
+        "touchstart",
+        function(e){
+
+            const t =
+            e.touches[0];
+
+            iniciar(
+                t.clientX,
+                t.clientY
+            );
+        },
+        {passive:true}
+    );
+
+
+    window.addEventListener(
+        "touchmove",
+        function(e){
+
+            if(!moviendo)return;
+
+            const t =
+            e.touches[0];
+
+            mover(
+                t.clientX,
+                t.clientY
+            );
+        },
+        {passive:true}
+    );
+
+
+    window.addEventListener(
+        "touchend",
+        terminar
+    );
+}
+
+
+/* =====================================================
+   ACTIVAR CADA ANILLO
+===================================================== */
+
+ruedaManual(
+    document.getElementById("azul")
+);
+
+ruedaManual(
+    document.getElementById("rojo")
+);
+
+</script>
+
+</body>
+</html>
