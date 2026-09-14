@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruleta 5S</title>
+<style>
+body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh}
+#stage{position:relative;width:98vw;height:98vw;max-width:540px;max-height:540px}
+.ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);touch-action:none}
+#blue{width:100%;height:100%;z-index:1}
+#red{width:60%;height:60%;z-index:2}
+#center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:34%;height:38%;z-index:10;background:linear-gradient(180deg,#fff176,#ffca00 40%,#ff8f00);clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);border:2px solid gold;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 15px gold}
+#center b{font-family:Arial Black;font-size:13px;color:#000;margin-top:2px}
+#center select{width:88%;background:#0a0a0a;color:#fff;border:2px solid gold;border-radius:10px;padding:6px 4px;font-weight:bold;font-size:12px;text-align:center;margin:2px 0}
+.bL{font-family:Arial Black;font-size:38px;fill:#eaffff;stroke:#001a5a;stroke-width:2.5;paint-order:stroke}
+.rL{font-family:Arial Black;font-size:17px;fill:#fff;stroke:#500;stroke-width:1.4;paint-order:stroke}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="blue" class="ring"><svg viewBox="0 0 500 500" width="100%" height="100%"><circle cx="250" cy="250" r="236" fill="none" stroke="#00d4ff" stroke-width="10" style="filter:drop-shadow(0 0 10px #00d4ff)"/><circle cx="250" cy="250" r="207" fill="#0e2e9e"/><g stroke="#001030" stroke-width="3" opacity="0.8"><line x1="250" y1="43" x2="250" y2="457"/><g transform="rotate(72 250 250)"><line x1="250" y1="43" x2="250" y2="457"/></g><g transform="rotate(144 250 250)"><line x1="250" y1="43" x2="250" y2="457"/></g><g transform="rotate(216 250 250)"><line x1="250" y1="43" x2="250" y2="457"/></g><g transform="rotate(288 250 250)"><line x1="250" y1="43" x2="250" y2="457"/></g></g><g id="bT"></g><g id="bTr"></g></svg></div>
+<div id="red" class="ring"><svg viewBox="0 0 300 300" width="100%" height="100%"><circle cx="150" cy="150" r="136" fill="none" stroke="#ff0000" stroke-width="6" style="filter:drop-shadow(0 0 8px red)"/><circle cx="150" cy="150" r="118" fill="#8b0000"/><g stroke="#000" stroke-width="2.5" opacity="0.7"><line x1="150" y1="32" x2="150" y2="268"/><g transform="rotate(72 150 150)"><line x1="150" y1="32" x2="150" y2="268"/></g><g transform="rotate(144 150 150)"><line x1="150" y1="32" x2="150" y2="268"/></g><g transform="rotate(216 150 150)"><line x1="150" y1="32" x2="150" y2="268"/></g><g transform="rotate(288 150 150)"><line x1="150" y1="32" x2="150" y2="268"/></g></g><g id="rT"></g><g id="rTr"></g></svg></div>
+<div id="center"><b>📅 Día:</b><select id="dia"><option>Selecciona un día</option></select><b>📅 Mes:</b><select id="mes"><option>Selecciona un mes</option></select></div>
+</div>
+<script>
+const blue=["VALE","MONZ","FER","OMAR","TONY"],red=["TRASPALEO","POLIPASTO 1","PALLETIZADO","MAPAS","POLIPASTO 2"];
+function add(bId,tId,names,isBlue){const b=document.getElementById(bId),t=document.getElementById(tId),cx=isBlue?250:150,r=isBlue?165:88;names.forEach((n,i)=>{const ang=i*360/names.length-90,rad=ang*Math.PI/180,x=cx+r*Math.cos(rad),y=cx+r*Math.sin(rad);const txt=document.createElementNS("http://www.w3.org/2000/svg","text");txt.setAttribute("x",x);txt.setAttribute("y",y);txt.setAttribute("text-anchor","middle");txt.setAttribute("dominant-baseline","middle");txt.setAttribute("class",isBlue?"bL":"rL");txt.setAttribute("transform",`rotate(${ang+90} ${x} ${y})`);txt.textContent=n;b.appendChild(txt);const tr=document.createElementNS("http://www.w3.org/2000/svg","path");const rr=isBlue?r-20:r-15,tx=cx+rr*Math.cos(rad),ty=cx+rr*Math.sin(rad);tr.setAttribute("d",isBlue?`M ${tx-9} ${ty-7} L ${tx+9} ${ty-7} L ${tx} ${ty+7} Z`:`M ${tx-7} ${ty-5} L ${tx+7} ${ty-5} L ${tx} ${ty+5} Z`);tr.setAttribute("fill",isBlue?"#00c8ff":"#ff2222");t.appendChild(tr);});}
+add("bT","bTr",blue,true);add("rT","rTr",red,false);
+function rot(el){let a=0,sa=0,s=0,d=false;const ga=e=>{const rc=el.getBoundingClientRect(),cx=rc.left+rc.width/2,cy=rc.top+rc.height/2,p=e.touches?e.touches[0]:e;return Math.atan2(p.clientY-cy,p.clientX-cx)*180/Math.PI;};const down=e=>{d=true;s=ga(e);sa=a;};const move=e=>{if(!d)return;e.preventDefault();a=sa+(ga(e)-s);el.style.transform=`translate(-50%,-50%) rotate(${a}deg)`;};el.addEventListener('touchstart',down,{passive:false});el.addEventListener('touchmove',move,{passive:false});el.addEventListener('touchend',()=>d=false);el.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',()=>d=false); }
+rot(document.getElementById('blue'));rot(document.getElementById('red'));
+const dia=document.getElementById('dia'),mes=document.getElementById('mes');for(let i=1;i<=31;i++){let o=document.createElement('option');o.textContent=i;dia.appendChild(o);}["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].forEach(m=>{let o=document.createElement('option');o.textContent=m;mes.appendChild(o);});
+</script>
+</body>
+</html>
