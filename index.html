@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ruleta</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    background:#000;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+
+/* ==================================================
+   RUEDA
+================================================== */
+
+.ruleta{
+    position:relative;
+    width:min(96vw,760px);
+    aspect-ratio:1;
+}
+
+
+/* ==================================================
+   ANILLO AZUL
+================================================== */
+
+.anillo-azul{
+
+    position:absolute;
+
+    inset:0;
+
+    border-radius:50%;
+
+    border:10px solid #00bfff;
+
+    background:
+
+        conic-gradient(
+            from -90deg,
+
+            #075cff 0deg 72deg,
+            #0039ad 72deg 144deg,
+
+            #075cff 144deg 216deg,
+            #0039ad 216deg 288deg,
+
+            #075cff 288deg 360deg
+        );
+
+    box-shadow:
+
+        0 0 10px #00cfff,
+        0 0 25px #006aff,
+        0 0 55px #004cff,
+
+        inset 0 0 25px #00aaff;
+
+    cursor:grab;
+
+    touch-action:none;
+
+    z-index:1;
+}
+
+.anillo-azul:active{
+    cursor:grabbing;
+}
+
+
+/* ==================================================
+   ANILLO ROJO
+================================================== */
+
+.anillo-rojo{
+
+    position:absolute;
+
+    inset:15%;
+
+    border-radius:50%;
+
+    border:9px solid #ff1717;
+
+    background:
+
+        conic-gradient(
+            from -90deg,
+
+            #ff1111 0deg 72deg,
+            #a90000 72deg 144deg,
+
+            #ff1111 144deg 216deg,
+            #a90000 216deg 288deg,
+
+            #ff1111 288deg 360deg
+        );
+
+    box-shadow:
+
+        0 0 10px #ff0000,
+        0 0 25px #e00000,
+        0 0 45px #8d0000,
+
+        inset 0 0 25px #ff6000;
+
+    cursor:grab;
+
+    touch-action:none;
+
+    z-index:5;
+}
+
+.anillo-rojo:active{
+    cursor:grabbing;
+}
+
+
+/* ==================================================
+   DIVISIONES AZULES
+================================================== */
+
+.division-azul{
+
+    position:absolute;
+
+    width:4px;
+
+    height:50%;
+
+    left:calc(50% - 2px);
+
+    top:0;
+
+    background:#00184f;
+
+    transform-origin:50% 100%;
+
+    box-shadow:0 0 5px #00bfff;
+
+    pointer-events:none;
+}
+
+
+/* ==================================================
+   DIVISIONES ROJAS
+================================================== */
+
+.division-roja{
+
+    position:absolute;
+
+    width:4px;
+
+    height:50%;
+
+    left:calc(50% - 2px);
+
+    top:0;
+
+    background:#520000;
+
+    transform-origin:50% 100%;
+
+    box-shadow:0 0 5px #ff4444;
+
+    pointer-events:none;
+}
+
+
+/* ==================================================
+   NOMBRES
+================================================== */
+
+.nombre{
+
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:max-content;
+
+    transform-origin:center;
+
+    white-space:nowrap;
+
+    font-weight:900;
+
+    text-align:center;
+
+    pointer-events:none;
+
+    z-index:20;
+}
+
+
+/* ---------- AZULES ---------- */
+
+.nombre-azul{
+
+    color:#fff;
+
+    font-size:clamp(
+        25px,
+        5.5vw,
+        58px
+    );
+
+    -webkit-text-stroke:
+        clamp(2px,0.5vw,5px)
+        #00133f;
+
+    text-shadow:
+
+        0 0 5px #00eaff,
+        0 0 12px #00aaff,
+        0 4px 3px #00184d;
+}
+
+
+/* ---------- ROJOS ---------- */
+
+.nombre-rojo{
+
+    color:#fff;
+
+    font-size:clamp(
+        18px,
+        3.8vw,
+        40px
+    );
+
+    -webkit-text-stroke:
+        clamp(2px,0.4vw,4px)
+        #650000;
+
+    text-shadow:
+
+        0 0 5px #ffaaaa,
+        0 0 10px #ff2222,
+        0 4px 3px #500000;
+}
+
+
+/* ==================================================
+   POSICIONES DE LOS NOMBRES AZULES
+================================================== */
+
+/*
+   Cada nombre está colocado a 39% del centro.
+   Después gira alrededor del centro.
+*/
+
+
+.azul-vale{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(0deg)
+        translateY(-39%)
+        rotate(0deg);
+}
+
+.azul-monz{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(72deg)
+        translateY(-39%)
+        rotate(-72deg);
+}
+
+.azul-fer{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(144deg)
+        translateY(-39%)
+        rotate(-144deg);
+}
+
+.azul-omar{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(216deg)
+        translateY(-39%)
+        rotate(-216deg);
+}
+
+.azul-tony{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(288deg)
+        translateY(-39%)
+        rotate(-288deg);
+}
+
+
+/* ==================================================
+   POSICIONES ROJAS
+================================================== */
+
+.rojo-traspaleo{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(0deg)
+        translateY(-35%)
+        rotate(0deg);
+}
+
+.rojo-polipasto1{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(72deg)
+        translateY(-35%)
+        rotate(-72deg);
+}
+
+.rojo-palletizado{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(144deg)
+        translateY(-35%)
+        rotate(-144deg);
+}
+
+.rojo-mapas{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(216deg)
+        translateY(-35%)
+        rotate(-216deg);
+}
+
+.rojo-polipasto2{
+
+    transform:
+        translate(-50%,-50%)
+        rotate(288deg)
+        translateY(-35%)
+        rotate(-288deg);
+}
+
+
+/* ==================================================
+   PENTÁGONO CENTRAL
+   COMPLETAMENTE FIJO
+================================================== */
+
+.centro{
+
+    position:absolute;
+
+    inset:27%;
+
+    z-index:50;
+
+    pointer-events:auto;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+}
+
+
+.pentagono{
+
+    width:100%;
+    height:100%;
+
+    clip-path:
+
+        polygon(
+            50% 0%,
+            98% 35%,
+            80% 100%,
+            20% 100%,
+            2% 35%
+        );
+
+    background:
+
+        linear-gradient(
+            145deg,
+            #fff82d 0%,
+            #ffd000 45%,
+            #c48800 100%
+        );
+
+    box-shadow:
+
+        0 0 12px #fff000,
+        0 0 30px #ffb700;
+
+    padding:
+
+        18%
+        11%
+        15%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    gap:10%;
+}
+
+
+/* ==================================================
+   DIA / MES
+================================================== */
+
+.campo{
+
+    width:100%;
+
+    text-align:center;
+}
+
+
+.campo label{
+
+    display:block;
+
+    color:#fff;
+
+    font-size:clamp(
+        18px,
+        4vw,
+        34px
+    );
+
+    font-weight:900;
+
+    margin-bottom:5px;
+
+    -webkit-text-stroke:
+        2px #111;
+
+    text-shadow:
+        0 3px 2px #222;
+}
+
+
+/* ==================================================
+   LISTAS COMPACTAS
+================================================== */
+
+select{
+
+    width:100%;
+
+    height:clamp(
+        34px,
+        5.8vw,
+        55px
+    );
+
+    border:
+
+        clamp(
+            2px,
+            .4vw,
+            4px
+        )
+        solid #000;
+
+    border-radius:12px;
+
+    background:#111;
+
+    color:#fff;
+
+    padding:
+
+        0
+        28px
+        0
+        10px;
+
+    font-size:clamp(
+        12px,
+        2.2vw,
+        21px
+    );
+
+    font-weight:800;
+
+    outline:none;
+
+    cursor:pointer;
+}
+
+
+select:focus{
+
+    border-color:#fff000;
+
+}
+
+
+/* ==================================================
+   FLECHAS
+================================================== */
+
+.flecha{
+
+    position:absolute;
+
+    z-index:80;
+
+    color:#00eaff;
+
+    font-size:clamp(
+        30px,
+        6vw,
+        60px
+    );
+
+    line-height:1;
+
+    -webkit-text-stroke:
+        3px #00104d;
+
+    text-shadow:
+        0 0 10px #00cfff;
+
+    pointer-events:none;
+}
+
+
+.flecha-arriba{
+
+    top:13%;
+
+    left:50%;
+
+    transform:
+        translateX(-50%);
+}
+
+
+.flecha-abajo{
+
+    bottom:13%;
+
+    left:50%;
+
+    transform:
+        translateX(-50%);
+}
+
+
+.flecha-izquierda{
+
+    left:11%;
+
+    top:50%;
+
+    transform:
+        translateY(-50%);
+}
+
+
+.flecha-derecha{
+
+    right:11%;
+
+    top:50%;
+
+    transform:
+        translateY(-50%);
+}
+
+
+/* ==================================================
+   CELULAR
+================================================== */
+
+@media(max-width:500px){
+
+    .ruleta{
+        width:96vw;
+    }
+
+    .anillo-azul{
+        border-width:7px;
+    }
+
+    .anillo-rojo{
+        border-width:6px;
+    }
+
+    .centro{
+        inset:27%;
+    }
+
+    .pentagono{
+        padding-left:10%;
+        padding-right:10%;
+    }
+
+    .campo label{
+        -webkit-text-stroke:2px #111;
+    }
+
+    select{
+        border-width:3px;
+        border-radius:10px;
+    }
+
+}
+
+
+/* ==================================================
+   PANTALLAS MUY PEQUEÑAS
+================================================== */
+
+@media(max-width:360px){
+
+    .nombre-azul{
+        font-size:24px;
+    }
+
+    .nombre-rojo{
+        font-size:16px;
+    }
+
+    .campo label{
+        font-size:17px;
+    }
+
+    select{
+        font-size:11px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<div class="ruleta">
+
+
+    <!-- ============================================
+         ANILLO AZUL
+    ============================================= -->
+
+    <div
+        class="anillo-azul"
+        id="anilloAzul"
+    >
+
+        <!-- Divisiones -->
+
+        <div
+            class="division-azul"
+            style="transform:rotate(0deg)"
+        ></div>
+
+        <div
+            class="division-azul"
+            style="transform:rotate(72deg)"
+        ></div>
+
+        <div
+            class="division-azul"
+            style="transform:rotate(144deg)"
+        ></div>
+
+        <div
+            class="division-azul"
+            style="transform:rotate(216deg)"
+        ></div>
+
+        <div
+            class="division-azul"
+            style="transform:rotate(288deg)"
+        ></div>
+
+
+        <!-- NOMBRES -->
+
+        <div
+            class="nombre nombre-azul azul-vale"
+        >
+            Vale
+        </div>
+
+
+        <div
+            class="nombre nombre-azul azul-monz"
+        >
+            Monz
+        </div>
+
+
+        <div
+            class="nombre nombre-azul azul-fer"
+        >
+            Fer
+        </div>
+
+
+        <div
+            class="nombre nombre-azul azul-omar"
+        >
+            Omar
+        </div>
+
+
+        <div
+            class="nombre nombre-azul azul-tony"
+        >
+            Tony
+        </div>
+
+    </div>
+
+
+
+    <!-- ============================================
+         ANILLO ROJO
+    ============================================= -->
+
+    <div
+        class="anillo-rojo"
+        id="anilloRojo"
+    >
+
+        <!-- Divisiones -->
+
+        <div
+            class="division-roja"
+            style="transform:rotate(0deg)"
+        ></div>
+
+        <div
+            class="division-roja"
+            style="transform:rotate(72deg)"
+        ></div>
+
+        <div
+            class="division-roja"
+            style="transform:rotate(144deg)"
+        ></div>
+
+        <div
+            class="division-roja"
+            style="transform:rotate(216deg)"
+        ></div>
+
+        <div
+            class="division-roja"
+            style="transform:rotate(288deg)"
+        ></div>
+
+
+        <!-- NOMBRES -->
+
+        <div
+            class="nombre nombre-rojo rojo-traspaleo"
+        >
+            Traspaleo
+        </div>
+
+
+        <div
+            class="nombre nombre-rojo rojo-polipasto1"
+        >
+            Polipasto 1
+        </div>
+
+
+        <div
+            class="nombre nombre-rojo rojo-palletizado"
+        >
+            Palletizado
+        </div>
+
+
+        <div
+            class="nombre nombre-rojo rojo-mapas"
+        >
+            Mapas
+        </div>
+
+
+        <div
+            class="nombre nombre-rojo rojo-polipasto2"
+        >
+            Polipasto 2
+        </div>
+
+    </div>
+
+
+
+    <!-- ============================================
+         CENTRO FIJO
+    ============================================= -->
+
+    <div class="centro">
+
+        <div class="pentagono">
+
+
+            <!-- DÍA -->
+
+            <div class="campo">
+
+                <label for="dia">
+                    Día:
+                </label>
+
+                <select id="dia">
+
+                    <option value="">
+                        Selecciona un día
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- MES -->
+
+            <div class="campo">
+
+                <label for="mes">
+                    Mes:
+                </label>
+
+                <select id="mes">
+
+                    <option value="">
+                        Selecciona un mes
+                    </option>
+
+                    <option value="Enero">
+                        Enero
+                    </option>
+
+                    <option value="Febrero">
+                        Febrero
+                    </option>
+
+                    <option value="Marzo">
+                        Marzo
+                    </option>
+
+                    <option value="Abril">
+                        Abril
+                    </option>
+
+                    <option value="Mayo">
+                        Mayo
+                    </option>
+
+                    <option value="Junio">
+                        Junio
+                    </option>
+
+                    <option value="Julio">
+                        Julio
+                    </option>
+
+                    <option value="Agosto">
+                        Agosto
+                    </option>
+
+                    <option value="Septiembre">
+                        Septiembre
+                    </option>
+
+                    <option value="Octubre">
+                        Octubre
+                    </option>
+
+                    <option value="Noviembre">
+                        Noviembre
+                    </option>
+
+                    <option value="Diciembre">
+                        Diciembre
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ============================================
+         INDICADORES FIJOS
+    ============================================= -->
+
+    <div class="flecha flecha-arriba">
+        ▼
+    </div>
+
+    <div class="flecha flecha-abajo">
+        ▲
+    </div>
+
+    <div class="flecha flecha-izquierda">
+        ▶
+    </div>
+
+    <div class="flecha flecha-derecha">
+        ◀
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* ==================================================
+   CREAR DÍAS
+================================================== */
+
+const selectorDia =
+    document.getElementById("dia");
+
+
+for(let i=1;i<=31;i++){
+
+    const opcion =
+        document.createElement("option");
+
+    opcion.value=i;
+
+    opcion.textContent=i;
+
+    selectorDia.appendChild(opcion);
+
+}
+
+
+
+/* ==================================================
+   GIRAR UN ANILLO CON EL DEDO O MOUSE
+================================================== */
+
+function hacerGiratorio(elemento){
+
+    let activo=false;
+
+    let ultimoAngulo=0;
+
+    let rotacion=0;
+
+
+    function obtenerAngulo(x,y){
+
+        const rect =
+            elemento.getBoundingClientRect();
+
+        const centroX =
+            rect.left +
+            rect.width / 2;
+
+        const centroY =
+            rect.top +
+            rect.height / 2;
+
+        return Math.atan2(
+            y-centroY,
+            x-centroX
+        ) * 180 / Math.PI;
+
+    }
+
+
+    function comenzar(x,y){
+
+        activo=true;
+
+        ultimoAngulo =
+            obtenerAngulo(x,y);
+
+        elemento.style.transition="none";
+
+    }
+
+
+    function mover(x,y){
+
+        if(!activo)return;
+
+        const nuevoAngulo =
+            obtenerAngulo(x,y);
+
+        let diferencia =
+            nuevoAngulo -
+            ultimoAngulo;
+
+
+        /*
+          Evita que el anillo dé un salto
+          cuando pasamos de 180 a -180 grados.
+        */
+
+        if(diferencia>180){
+            diferencia-=360;
+        }
+
+        if(diferencia<-180){
+            diferencia+=360;
+        }
+
+
+        rotacion += diferencia;
+
+        ultimoAngulo =
+            nuevoAngulo;
+
+
+        elemento.style.transform =
+            "rotate(" +
+            rotacion +
+            "deg)";
+
+    }
+
+
+    function terminar(){
+
+        activo=false;
+
+    }
+
+
+
+    /* =========================
+       MOUSE
+    ========================= */
+
+    elemento.addEventListener(
+        "mousedown",
+        function(e){
+
+            e.preventDefault();
+
+            comenzar(
+                e.clientX,
+                e.clientY
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "mousemove",
+        function(e){
+
+            mover(
+                e.clientX,
+                e.clientY
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "mouseup",
+        terminar
+    );
+
+
+
+    /* =========================
+       CELULAR
+    ========================= */
+
+    elemento.addEventListener(
+        "touchstart",
+        function(e){
+
+            const toque =
+                e.touches[0];
+
+            comenzar(
+                toque.clientX,
+                toque.clientY
+            );
+
+        },
+        {
+            passive:true
+        }
+    );
+
+
+    window.addEventListener(
+        "touchmove",
+        function(e){
+
+            if(!activo)return;
+
+            const toque =
+                e.touches[0];
+
+            mover(
+                toque.clientX,
+                toque.clientY
+            );
+
+        },
+        {
+            passive:true
+        }
+    );
+
+
+    window.addEventListener(
+        "touchend",
+        terminar
+    );
+
+}
+
+
+
+/* ==================================================
+   ACTIVAR CADA ANILLO POR SEPARADO
+================================================== */
+
+hacerGiratorio(
+    document.getElementById("anilloAzul")
+);
+
+
+hacerGiratorio(
+    document.getElementById("anilloRojo")
+);
+
+
+</script>
+
+</body>
+</html>
