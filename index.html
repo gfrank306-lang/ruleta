@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruleta 5S</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh}
+#stage{position:relative;width:98vw;height:98vw;max-width:540px;max-height:540px}
+.ring{position:absolute;left:50%;top:50%;border-radius:50%;touch-action:none;transform:translate(-50%,-50%)}
+#blue{width:100%;height:100%;z-index:1}
+#red{width:62%;height:62%;z-index:2}
+.bLabel{font-family:Arial Black;font-size:42px;fill:#e8fbff;stroke:#002a6e;stroke-width:3;paint-order:stroke}
+.rLabel{font-family:Arial Black;font-size:19px;fill:#fff;stroke:#600;stroke-width:1.8;paint-order:stroke}
+#center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:40%;height:44%;z-index:10;background:linear-gradient(180deg,#fff9a0,#ffde00 35%,#ffb700 75%,#ff8c00);clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);border:3px solid #ffef00;box-shadow:0 0 25px gold;inset 0 0 12px rgba(255,255,255,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:10%}
+#center b{font-size:14px;color:#000} #center select{width:86%;background:#0a0a0a;color:#fff;border:2px solid #ffcc00;border-radius:10px;padding:5px;font-weight:bold;font-size:11px;text-align:center;margin:2px 0}
+#res{margin-top:4px;background:#000;color:#fff;padding:3px 8px;border-radius:10px;font-size:10px}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="blue" class="ring"><svg viewBox="0 0 500 500"><circle cx="250" cy="250" r="235" fill="none" stroke="#00bfff" stroke-width="10" style="filter:drop-shadow(0 0 12px #00bfff)"/><circle cx="250" cy="250" r="205" fill="#0a2e9a"/><g stroke="#001030" stroke-width="3"><line x1="250" y1="45" x2="250" y2="455"/><g transform="rotate(72 250 250)"><line x1="250" y1="45" x2="250" y2="455"/></g><g transform="rotate(144 250 250)"><line x1="250" y1="45" x2="250" y2="455"/></g><g transform="rotate(216 250 250)"><line x1="250" y1="45" x2="250" y2="455"/></g><g transform="rotate(288 250 250)"><line x1="250" y1="45" x2="250" y2="455"/></g></g><g id="bL"></g><g id="bT"></g></svg></div>
+<div id="red" class="ring"><svg viewBox="0 0 300 300"><circle cx="150" cy="150" r="140" fill="none" stroke="#ff0000" stroke-width="7" style="filter:drop-shadow(0 0 10px red)"/><circle cx="150" cy="150" r="122" fill="#8c0000"/><g stroke="#000" stroke-width="3"><line x1="150" y1="28" x2="150" y2="272"/><g transform="rotate(72 150 150)"><line x1="150" y1="28" x2="150" y2="272"/></g><g transform="rotate(144 150 150)"><line x1="150" y1="28" x2="150" y2="272"/></g><g transform="rotate(216 150 150)"><line x1="150" y1="28" x2="150" y2="272"/></g><g transform="rotate(288 150 150)"><line x1="150" y1="28" x2="150" y2="272"/></g></g><g id="rL"></g><g id="rT"></g></svg></div>
+<div id="center"><b>📅 Día:</b><select id="dia"><option>Selecciona un día</option></select><b>📅 Mes:</b><select id="mes"><option>Selecciona un mes</option></select><div id="res">Vale → Traspaleo</div></div>
+</div>
+<script>
+const blueNames=["VALE","MONZ","FER","OMAR","TONY"],redNames=["TRASPALEO","POLIPASTO 1","PALLETIZADO","MAPAS","POLIPASTO 2"];
+function addLabels(gId,tId,names,rOuter,isBlue){const g=document.getElementById(gId),t=document.getElementById(tId);const cx=isBlue?250:150,r=isBlue?165:95;names.forEach((name,i)=>{const ang=i*360/names.length-90,rad=ang*Math.PI/180;const x=cx+r*Math.cos(rad),y=cx+r*Math.sin(rad);const txt=document.createElementNS("http://www.w3.org/2000/svg","text");txt.setAttribute("x",x);txt.setAttribute("y",y);txt.setAttribute("text-anchor","middle");txt.setAttribute("dominant-baseline","middle");txt.setAttribute("class",isBlue?"bLabel":"rLabel");txt.setAttribute("transform",`rotate(${ang+90} ${x} ${y})`);txt.textContent=name;g.appendChild(txt);const tri=document.createElementNS("http://www.w3.org/2000/svg","path");const tr=isBlue?r-22:r-18;const tx=cx+tr*Math.cos(rad),ty=cx+tr*Math.sin(rad);tri.setAttribute("d",isBlue?`M ${tx-12} ${ty-10} L ${tx+12} ${ty-10} L ${tx} ${ty+10} Z`:`M ${tx-10} ${ty-8} L ${tx+10} ${ty-8} L ${tx} ${ty+8} Z`);tri.setAttribute("fill",isBlue?"#00c8ff":"#ff2222");tri.setAttribute("stroke","#000");tri.setAttribute("stroke-width","1");tri.setAttribute("transform",`rotate(${ang+90} ${tx} ${ty})`);t.appendChild(tri);});}
+addLabels("bL","bT",blueNames,165,true);addLabels("rL","rT",redNames,78,false);
+function makeRot(el){let ang=0,sa=0,st=0,drag=false;const getA=e=>{const rc=el.getBoundingClientRect(),cx=rc.left+rc.width/2,cy=rc.top+rc.height/2,p=e.touches?e.touches[0]:e;return Math.atan2(p.clientY-cy,p.clientX-cx)*180/Math.PI;};const down=e=>{drag=true;st=getA(e);sa=ang;};const move=e=>{if(!drag)return;e.preventDefault();ang=sa+(getA(e)-st);el.style.transform=`translate(-50%,-50%) rotate(${ang}deg)`;update();};const up=()=>drag=false;el.addEventListener('touchstart',down,{passive:false});el.addEventListener('touchmove',move,{passive:false});el.addEventListener('touchend',up);el.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);el._get=()=>ang;}
+const bEl=document.getElementById('blue'),rEl=document.getElementById('red');makeRot(bEl);makeRot(rEl);
+const dia=document.getElementById('dia'),mes=document.getElementById('mes');for(let i=1;i<=31;i++){let o=document.createElement('option');o.textContent=i;dia.appendChild(o);}["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"].forEach(m=>{let o=document.createElement('option');o.textContent=m;mes.appendChild(o);});
+function idx(a,c){let n=((a+90)%360+360)%360;return Math.floor(((360-n+270)%360)/(360/c))%c;}
+function update(){const bi=idx(bEl._get(),5),ri=idx(rEl._get(),5);document.getElementById('res').textContent=`${blueNames[bi]} → ${redNames[ri]}`;}update();
+</script>
+</body>
+</html>
